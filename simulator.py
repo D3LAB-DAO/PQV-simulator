@@ -1,0 +1,91 @@
+import os
+import argparse
+import random
+import matplotlib.pyplot as plt
+from math import floor
+from copy import deepcopy
+
+from dist import pareto
+from agent import Agent
+from box import Box
+
+
+if __name__ == "__main__":
+
+    """argparse"""
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--nRounds', type=int, default=10000)
+    parser.add_argument('--nPolicies', type=int, default=15)
+    parser.add_argument('--nAgents', type=int, default=10000)
+    parser.add_argument('--totalBallots', type=int, default=1000000)
+    # parser.add_argument('--txWindowMin', type=int, default=51)
+    # parser.add_argument('--votingMethod', type=str, default='QV',
+    #                     choices=('equal', 'QV', 'PQV'))
+    parser.add_argument('--seed', type=int, default=950327)
+    parser.add_argument('--path')  # location of log files
+    parser.add_argument('--no-save', action='store_true')
+    args = parser.parse_args()
+    print(args)
+
+    random.seed(args.seed)
+
+    nPolicies = args.nPolicies
+    nAgents = args.nAgents
+    totalBallots = args.totalBallots
+
+    # Pareto dist
+    ps = pareto(nAgents)
+    ps = [floor(p * (totalBallots / sum(ps))) for p in ps]
+    ps[-1] = totalBallots - sum(ps[:-1])
+
+    # Agents
+    agents = []
+    for i in range(nAgents):
+        agents.append(Agent(nPolicies, ps[i]))
+
+    """
+    Simulation
+    """
+    unmatchingCount = 0
+
+    for r in range(args.nRounds):
+        print("Round ", r)
+
+        """Set Ballot Box"""
+        box = Box(nPolicies)
+        box_equal = deepcopy(box)
+        box_QV = deepcopy(box)
+        box_PQV = deepcopy(box)
+        # box.reset(nPolicies)
+
+        for a, agent in enumerate(agents):
+            print("Agent ", a, end='\r')
+
+            wheres, amounts = agent.voting("equal")
+            for where, amount in zip(wheres, amounts):
+                box_equal.addBallotOnce(where, amount, totalBallots, "equal")
+
+            wheres, amounts = agent.voting("QV")
+            for where, amount in zip(wheres, amounts):
+                box_QV.addBallotOnce(where, amount, totalBallots, "QV")
+
+            wheres, amounts = agent.voting("PQV")
+            for where, amount in zip(wheres, amounts):
+                box_PQV.addBallotOnce(where, amount, totalBallots, "PQV")
+
+        """Set Agents"""
+        # # Pareto dist
+        # ps = pareto(nAgents)
+        # ps = [floor(p * (totalBallots / sum(ps))) for p in ps]
+        # ps[-1] = totalBallots - sum(ps[:-1])
+        for agent, p in zip(agents, ps):
+            agent.reset(nPolicies, p)
+
+        if box_PQV.getWinner() != box_QV.getWinner():
+            print(">>> winner : ", box_equal.getWinner(), "\t", box_QV.getWinner(), "\t", box_PQV.getWinner())
+            unmatchingCount += 1
+        # print(">>> current: ", box_equal.policies, "\t", box_QV.policies, "\t", box_PQV.policies,)
+
+        print("\n")
+
+    print("unmatchingCount: ", unmatchingCount)

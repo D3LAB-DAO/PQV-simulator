@@ -49,7 +49,7 @@ def simulation(index, s, agents, ps, rounds, args, result):
         # ps = [floor(p * (totalBallots / sum(ps))) for p in ps]
         # ps[-1] = totalBallots - sum(ps[:-1])
         for agent, p in zip(agents, ps):
-            agent.reset(nPolicies, p)
+            agent.reset(args.nPolicies, p)
 
         if box_PQV.getWinner() != box_QV.getWinner():
             # print(">>> winner : ", box_equal.getWinner(), "\t", box_QV.getWinner(), "\t", box_PQV.getWinner())
@@ -81,19 +81,15 @@ if __name__ == "__main__":
 
     random.seed(args.seed)
 
-    nPolicies = args.nPolicies
-    nAgents = args.nAgents
-    totalBallots = args.totalBallots
-
     # Pareto dist
-    ps = pareto(nAgents)
-    ps = [floor(p * (totalBallots / sum(ps))) for p in ps]
-    ps[-1] = totalBallots - sum(ps[:-1])
+    ps = pareto(args.nAgents)
+    ps = [floor(p * (args.totalBallots / sum(ps))) for p in ps]
+    ps[-1] = args.totalBallots - sum(ps[:-1])
 
     # Agents
     agents = []
-    for i in range(nAgents):
-        agents.append(Agent(nPolicies, ps[i]))
+    for i in range(args.nAgents):
+        agents.append(Agent(args.nPolicies, ps[i]))
 
     """
     Multiprocessing
@@ -121,5 +117,5 @@ if __name__ == "__main__":
         else:
             _sum += tmp
 
-    # print("unmatchingCount: ", unmatchingCount)
-    print("\nunmatchingCount: ", _sum)
+    # print("\nunmatchingCount: ", _sum)
+    print("\nsimilarity: ", 100. - (_sum / args.nRounds * 100.), "%")

@@ -1,14 +1,64 @@
+from multiprocessing import Process, Queue
 import os
 import argparse
 import random
 # import matplotlib.pyplot as plt
 from math import floor
 from copy import deepcopy
-from tqdm import tqdm
+# from tqdm import tqdm
+from numpy.random import permutation
 
 from dist import pareto
 from agent import Agent
 from box import Box
+
+
+def simulation(index, s, agents, ps, rounds, args, result):
+    random.seed(s)
+
+    unmatchingCount = 0
+
+    for r in range(rounds):
+        print(">>> Process: ", index, "\tRound ", r, "\t/", rounds, end='\r')
+
+        """Set Ballot Box"""
+        box = Box(args.nPolicies)
+        box_equal = deepcopy(box)
+        box_QV = deepcopy(box)
+        box_PQV = deepcopy(box)
+        # box.reset(nPolicies)
+
+        for a, agent in enumerate(agents):
+            # print("\tAgent ", a, end='\r')
+
+            wheres, amounts = agent.voting("equal")
+            for where, amount in zip(wheres, amounts):
+                box_equal.addBallotOnce(where, amount, args.totalBallots, "equal")
+
+            wheres, amounts = agent.voting("QV")
+            for where, amount in zip(wheres, amounts):
+                box_QV.addBallotOnce(where, amount, args.totalBallots, "QV")
+
+            wheres, amounts = agent.voting("PQV")
+            for where, amount in zip(wheres, amounts):
+                box_PQV.addBallotOnce(where, amount, args.totalBallots, "PQV")
+
+        """Set Agents"""
+        # # Pareto dist
+        # ps = pareto(nAgents)
+        # ps = [floor(p * (totalBallots / sum(ps))) for p in ps]
+        # ps[-1] = totalBallots - sum(ps[:-1])
+        for agent, p in zip(agents, ps):
+            agent.reset(nPolicies, p)
+
+        if box_PQV.getWinner() != box_QV.getWinner():
+            # print(">>> winner : ", box_equal.getWinner(), "\t", box_QV.getWinner(), "\t", box_PQV.getWinner())
+            unmatchingCount += 1
+        # print(">>> current: ", box_equal.policies, "\t", box_QV.policies, "\t", box_PQV.policies,)
+        # print("\n")
+
+    # print(unmatchingCount)
+    result.put(unmatchingCount)
 
 
 if __name__ == "__main__":
@@ -22,6 +72,7 @@ if __name__ == "__main__":
     # parser.add_argument('--txWindowMin', type=int, default=51)
     # parser.add_argument('--votingMethod', type=str, default='QV',
     #                     choices=('equal', 'QV', 'PQV'))
+    parser.add_argument('--nProcesses', type=int, default=20)
     parser.add_argument('--seed', type=int, default=950327)
     # parser.add_argument('--path')  # location of log files
     # parser.add_argument('--no-save', action='store_true')
@@ -45,48 +96,30 @@ if __name__ == "__main__":
         agents.append(Agent(nPolicies, ps[i]))
 
     """
-    Simulation
+    Multiprocessing
     """
-    unmatchingCount = 0
+    result = Queue()
+    seeds = permutation([i for i in range(args.nProcesses)])  # diff. seeds
+    procs = []
+    for index, s in enumerate(seeds):
+        # Process Objects Creation
+        procs.append(Process(target=simulation, args=(index, s, agents, ps, floor(args.nRounds / args.nProcesses), args, result)))
 
-    for r in tqdm(range(args.nRounds)):
-        # print("Round ", r)
+    for proc in procs:
+        proc.start()
 
-        """Set Ballot Box"""
-        box = Box(nPolicies)
-        box_equal = deepcopy(box)
-        box_QV = deepcopy(box)
-        box_PQV = deepcopy(box)
-        # box.reset(nPolicies)
+    for proc in procs:
+        proc.join()
 
-        for a, agent in enumerate(agents):
-            # print("Agent ", a, end='\r')
+    result.put('STOP')
 
-            wheres, amounts = agent.voting("equal")
-            for where, amount in zip(wheres, amounts):
-                box_equal.addBallotOnce(where, amount, totalBallots, "equal")
+    _sum = 0
+    while True:
+        tmp = result.get()
+        if tmp == 'STOP':
+            break
+        else:
+            _sum += tmp
 
-            wheres, amounts = agent.voting("QV")
-            for where, amount in zip(wheres, amounts):
-                box_QV.addBallotOnce(where, amount, totalBallots, "QV")
-
-            wheres, amounts = agent.voting("PQV")
-            for where, amount in zip(wheres, amounts):
-                box_PQV.addBallotOnce(where, amount, totalBallots, "PQV")
-
-        """Set Agents"""
-        # # Pareto dist
-        # ps = pareto(nAgents)
-        # ps = [floor(p * (totalBallots / sum(ps))) for p in ps]
-        # ps[-1] = totalBallots - sum(ps[:-1])
-        for agent, p in zip(agents, ps):
-            agent.reset(nPolicies, p)
-
-        if box_PQV.getWinner() != box_QV.getWinner():
-            # print(">>> winner : ", box_equal.getWinner(), "\t", box_QV.getWinner(), "\t", box_PQV.getWinner())
-            unmatchingCount += 1
-        # print(">>> current: ", box_equal.policies, "\t", box_QV.policies, "\t", box_PQV.policies,)
-
-        # print("\n")
-
-    print("unmatchingCount: ", unmatchingCount)
+    # print("unmatchingCount: ", unmatchingCount)
+    print("unmatchingCount: ", _sum)

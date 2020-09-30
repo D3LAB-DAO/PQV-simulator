@@ -5,7 +5,7 @@ import random
 # import matplotlib.pyplot as plt
 from math import floor
 from copy import deepcopy
-# from tqdm import tqdm
+from tqdm import tqdm
 from numpy.random import permutation
 
 from dist import pareto
@@ -18,8 +18,8 @@ def simulation(index, s, agents, ps, rounds, args, result):
 
     unmatchingCount = 0
 
-    for r in range(rounds):
-        print(">>> Process: ", index, "\tRound ", r, "\t/", rounds, end='\r')
+    for r in tqdm(range(rounds), position=index):
+        # print(">>> Process: ", index, "\tRound ", r+1, "\t/", rounds, end='\r')
 
         """Set Ballot Box"""
         box = Box(args.nPolicies)

@@ -1,9 +1,10 @@
 import os
 import argparse
 import random
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 from math import floor
 from copy import deepcopy
+from tqdm import tqdm
 
 from dist import pareto
 from agent import Agent
@@ -22,8 +23,8 @@ if __name__ == "__main__":
     # parser.add_argument('--votingMethod', type=str, default='QV',
     #                     choices=('equal', 'QV', 'PQV'))
     parser.add_argument('--seed', type=int, default=950327)
-    parser.add_argument('--path')  # location of log files
-    parser.add_argument('--no-save', action='store_true')
+    # parser.add_argument('--path')  # location of log files
+    # parser.add_argument('--no-save', action='store_true')
     args = parser.parse_args()
     print(args)
 
@@ -48,8 +49,8 @@ if __name__ == "__main__":
     """
     unmatchingCount = 0
 
-    for r in range(args.nRounds):
-        print("Round ", r)
+    for r in tqdm(range(args.nRounds)):
+        # print("Round ", r)
 
         """Set Ballot Box"""
         box = Box(nPolicies)
@@ -59,7 +60,7 @@ if __name__ == "__main__":
         # box.reset(nPolicies)
 
         for a, agent in enumerate(agents):
-            print("Agent ", a, end='\r')
+            # print("Agent ", a, end='\r')
 
             wheres, amounts = agent.voting("equal")
             for where, amount in zip(wheres, amounts):
@@ -82,10 +83,10 @@ if __name__ == "__main__":
             agent.reset(nPolicies, p)
 
         if box_PQV.getWinner() != box_QV.getWinner():
-            print(">>> winner : ", box_equal.getWinner(), "\t", box_QV.getWinner(), "\t", box_PQV.getWinner())
+            # print(">>> winner : ", box_equal.getWinner(), "\t", box_QV.getWinner(), "\t", box_PQV.getWinner())
             unmatchingCount += 1
         # print(">>> current: ", box_equal.policies, "\t", box_QV.policies, "\t", box_PQV.policies,)
 
-        print("\n")
+        # print("\n")
 
     print("unmatchingCount: ", unmatchingCount)

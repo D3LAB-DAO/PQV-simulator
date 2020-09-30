@@ -19,13 +19,30 @@ class Box():
         else:
             return False
 
-    def addBallotOnce(self, policy, amount, totalBallots, method):
-        if method == "equal":
+    def _power(self, amount, totalBallots, power):
+        if amount ** power >= randint(1, totalBallots):
+            return True
+        else:
+            return False
+
+    def _window(self):
+        return True
+
+    def addBallotOnce(self, policy, amount, totalBallots, votingMethod, **kwargs):
+        if votingMethod == "equal":
             self.policies[policy] += amount
-        elif method == "QV":
+        elif votingMethod == "QV":
             self.policies[policy] += floor(sqrt(amount))
-        elif method == "PQV":
-            picked = self._linear(amount, totalBallots)
+        elif votingMethod == "PQV":
+            if kwargs['pqvMethod'] == "linear":
+                picked = self._linear(amount, totalBallots)
+            elif kwargs['pqvMethod'] == "power":
+                picked = self._power(amount, totalBallots, kwargs['power'])
+            # elif kwargs['pqvMethod'] == "window":
+            #     return
+            else:
+                raise Exception("Wrong Method")
+
             if picked:
                 self.policies[policy] += floor(sqrt(amount))
             else:

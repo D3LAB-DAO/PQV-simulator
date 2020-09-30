@@ -6,7 +6,8 @@ import random
 from math import floor
 from copy import deepcopy
 from tqdm import tqdm
-from numpy.random import permutation
+import numpy as np
+from numpy.random import permutation, choice
 
 from dist import pareto
 from agent import Agent
@@ -28,6 +29,10 @@ def simulation(index, s, agents, ps, rounds, args, result):
         box_PQV = deepcopy(box)
         # box.reset(nPolicies)
 
+        if args.pqvMethod == 'window':
+            # idx = list(range())
+            total_wheres, total_amounts = [], []
+
         for a, agent in enumerate(agents):
             # print("\tAgent ", a, end='\r')
 
@@ -40,8 +45,20 @@ def simulation(index, s, agents, ps, rounds, args, result):
                 box_QV.addBallotOnce(where, amount, args.totalBallots, "QV")
 
             wheres, amounts = agent.voting("PQV")
-            for where, amount in zip(wheres, amounts):
-                box_PQV.addBallotOnce(where, amount, args.totalBallots, "PQV")
+            if args.pqvMethod == 'window':
+                total_wheres += list(wheres)
+                total_amounts += list(amounts)
+            elif args.pqvMethod == 'power':
+                for where, amount in zip(wheres, amounts):
+                    box_PQV.addBallotOnce(where, amount, args.totalBallots, "PQV", **{'pqvMethod': 'power', 'power': args.power})
+
+        if args.pqvMethod == 'window':
+            idx = list(range(len(total_amounts)))
+            p = np.array(total_amounts) / sum(total_amounts)
+            res_idx = choice(idx, floor(args.window / 100. * len(total_amounts)), p=p, replace=False)
+            total_wheres, total_amounts = np.array(total_wheres)[res_idx], np.array(total_amounts)[res_idx]
+            for where, amount in zip(total_wheres, total_amounts):
+                box_PQV.addBallotOnce(where, amount, args.totalBallots, "QV")
 
         """Set Agents"""
         # # Pareto dist
@@ -71,12 +88,22 @@ if __name__ == "__main__":
     parser.add_argument('--totalBallots', type=int, default=100000)
     parser.add_argument('--nProcesses', type=int, default=33)
     parser.add_argument('--seed', type=int, default=950327)
-    # parser.add_argument('--path')  # location of log files
-    # parser.add_argument('--no-save', action='store_true')
+
+    parser.add_argument('--pqvMethod', type=str, default='power',
+                        choices=('power', 'window'))
+    parser.add_argument('--power', type=float, default=1.0)
+    parser.add_argument('--window', type=int, default=0)
+
+    parser.add_argument('--path')  # location of log files
+    parser.add_argument('--no-save', action='store_true')
     args = parser.parse_args()
     print(args)
 
     random.seed(args.seed)
+    if args.pqvMethod == 'power':
+        args.window = None
+    elif args.pqvMethod == 'window':
+        args.power = None
 
     # Pareto dist
     ps = pareto(args.nAgents)
@@ -115,4 +142,10 @@ if __name__ == "__main__":
             _sum += tmp
 
     # print("\nunmatchingCount: ", _sum)
-    print("\nsimilarity: ", 100. - (_sum / args.nRounds * 100.), "%")
+    sim = 100. - (_sum / args.nRounds * 100.)
+    print("\nsimilarity: ", sim, "%")
+
+    path = (args.path or './log')
+    os.makedirs(path, exist_ok=True)
+    with open(path + "/simul-" + args.pqvMethod + ".txt", "a") as f:
+        f.write(str(args.power or args.window) + "\t" + str(sim) + "\n")

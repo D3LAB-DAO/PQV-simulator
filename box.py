@@ -30,6 +30,8 @@ class Box():
 
     def addBallotOnce(self, policy, amount, totalBallots, votingMethod, **kwargs):
         if votingMethod == "equal":
+            self.policies[policy] += 1
+        elif votingMethod == "plain":
             self.policies[policy] += amount
         elif votingMethod == "QV":
             self.policies[policy] += floor(sqrt(amount))

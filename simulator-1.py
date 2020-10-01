@@ -17,7 +17,9 @@ from box import Box
 def simulation(index, s, agents, ps, rounds, args, result):
     random.seed(s)
 
-    unmatchingCount_equal_vs_QV, unmatchingCount_QV_vs_PQV, unmatchingCount_PQV_vs_equal = 0, 0, 0
+    unmatchingCount_PQV_vs_equal = 0
+    unmatchingCount_PQV_vs_plain = 0
+    unmatchingCount_PQV_vs_QV = 0
 
     for r in tqdm(range(rounds), position=index):
         # print(">>> Process: ", index, "\tRound ", r+1, "\t/", rounds, end='\r')
@@ -25,6 +27,7 @@ def simulation(index, s, agents, ps, rounds, args, result):
         """Set Ballot Box"""
         box = Box(args.nPolicies)
         box_equal = deepcopy(box)
+        box_plain = deepcopy(box)
         box_QV = deepcopy(box)
         box_PQV = deepcopy(box)
         # box.reset(nPolicies)
@@ -38,7 +41,11 @@ def simulation(index, s, agents, ps, rounds, args, result):
 
             wheres, amounts = agent.voting("equal")
             for where, amount in zip(wheres, amounts):
-                box_equal.addBallotOnce(where, amount, args.totalBallots, "equal")
+                box_plain.addBallotOnce(where, amount, args.totalBallots, "equal")
+
+            wheres, amounts = agent.voting("plain")
+            for where, amount in zip(wheres, amounts):
+                box_plain.addBallotOnce(where, amount, args.totalBallots, "plain")
 
             wheres, amounts = agent.voting("QV")
             for where, amount in zip(wheres, amounts):
@@ -68,15 +75,17 @@ def simulation(index, s, agents, ps, rounds, args, result):
         for agent, p in zip(agents, ps):
             agent.reset(args.nPolicies, p)
 
-        if box_equal.getWinner() != box_QV.getWinner():
-            unmatchingCount_equal_vs_QV += 1
-        if box_QV.getWinner() != box_PQV.getWinner():
-            unmatchingCount_QV_vs_PQV += 1
         if box_PQV.getWinner() != box_equal.getWinner():
             unmatchingCount_PQV_vs_equal += 1
+        if box_PQV.getWinner() != box_plain.getWinner():
+            unmatchingCount_PQV_vs_plain += 1
+        if box_PQV.getWinner() != box_QV.getWinner():
+            unmatchingCount_PQV_vs_QV += 1
 
     # print(unmatchingCount)
-    result.put((unmatchingCount_equal_vs_QV, unmatchingCount_QV_vs_PQV, unmatchingCount_PQV_vs_equal))
+    result.put((unmatchingCount_PQV_vs_equal,
+                unmatchingCount_PQV_vs_plain,
+                unmatchingCount_PQV_vs_QV))
 
 
 if __name__ == "__main__":
@@ -134,19 +143,19 @@ if __name__ == "__main__":
 
     result.put('STOP')
 
-    _equal_vs_QV, _QV_vs_PQV, _PQV_vs_equal = 0, 0, 0
+    _PQV_vs_equal, _PQV_vs_plain, _PQV_vs_QV = 0, 0, 0
     while True:
         tmp = result.get()
         if tmp == 'STOP':
             break
         else:
-            _equal_vs_QV += tmp[0]
-            _QV_vs_PQV += tmp[1]
-            _PQV_vs_equal += tmp[2]
+            _PQV_vs_equal += tmp[0]
+            _PQV_vs_plain += tmp[1]
+            _PQV_vs_QV += tmp[2]
 
-    sim_equal_vs_QV = 100. - (_equal_vs_QV / args.nRounds * 100.)
-    sim_QV_vs_PQV = 100. - (_QV_vs_PQV / args.nRounds * 100.)
-    sim_PQV_vs_equal = 100. - (_PQV_vs_equal / args.nRounds * 100.)
+    sim_plain_vs_QV = 100. - (_PQV_vs_equal / args.nRounds * 100.)
+    sim_QV_vs_PQV = 100. - (_PQV_vs_plain / args.nRounds * 100.)
+    sim_PQV_vs_plain = 100. - (_PQV_vs_QV / args.nRounds * 100.)
     # print("\nsimilarity: ", sim, "%")
 
     path = (args.path or './log')
@@ -154,7 +163,7 @@ if __name__ == "__main__":
     with open(path + "/simul-" + args.pqvMethod + ".txt", "a") as f:
         f.write(
             str(args.power or args.window) + "\t" +
-            str(sim_equal_vs_QV) + "\t" +
+            str(sim_plain_vs_QV) + "\t" +
             str(sim_QV_vs_PQV) + "\t" +
-            str(sim_PQV_vs_equal) + "\t" +
+            str(sim_PQV_vs_plain) + "\t" +
             "\n")

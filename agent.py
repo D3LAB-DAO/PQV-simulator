@@ -15,6 +15,8 @@ class Agent():
 
     def voting(self, method):
         if method == "equal":
+            return [self.policies[0]], [1]
+        elif method == "plain":
             return [self.policies[0]], [self.ballot]
         elif (method == "QV") or (method == "PQV"):
             try:

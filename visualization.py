@@ -1,11 +1,10 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-from pprint import pprint
 
 
-if __name__ == "__main__":
-    with open("./log/simul-heatmap.txt", 'r') as f:
+def draw_heatmap(filename, show=False):
+    with open(filename, 'r') as f:
         lines = f.readlines()
         lines = [line.split('\t')[:-1] for line in lines]
 
@@ -30,6 +29,49 @@ if __name__ == "__main__":
         ax1 = sns.heatmap(df, cmap='GnBu', vmin=0, vmax=100)
         ax1.set_xlabel('Agents')
         ax1.set_ylabel('Policies')
-        # plt.show()
-        plt.savefig("./plots/" + name_ + '.png', format='png', dpi=300)
+
+        if show:
+            plt.show()
+        else:
+            plt.savefig("./plots/heatmap_" + name_ + '.png', format='png', dpi=300)
+            plt.close()
+
+
+def draw_graph(filename, show=False):
+    with open(filename, 'r') as f:
+        lines = f.readlines()
+        lines = [line.split('\t')[:-1] for line in lines]
+
+    keys = []
+    PQV_vs_equal, PQV_vs_plain, PQV_vs_QV = [], [], []
+
+    for line in lines:
+        keys.append(float(line[0]))
+        PQV_vs_equal.append(float(line[1]))
+        PQV_vs_plain.append(float(line[2]))
+        PQV_vs_QV.append(float(line[3]))
+
+    fig, ax1 = plt.subplots()
+
+    lists_ = [PQV_vs_equal, PQV_vs_plain, PQV_vs_QV]
+    names_ = ["PQV_vs_equal", "PQV_vs_plain", "PQV_vs_QV"]
+    for list_, name_ in zip(lists_, names_):
+        ax1.plot(keys, list_, label=name_)
+
+    ax1.set_xlabel('Exponents')
+    ax1.set_ylabel('Similarities')
+    ax1.set_xlim((keys[0], keys[-1]))
+    ax1.set_ylim((0, 100.))
+
+    plt.legend(loc='lower right')
+
+    if show:
+        plt.show()
+    else:
+        plt.savefig("./plots/graph.png", format='png', dpi=300)
         plt.close()
+
+
+if __name__ == "__main__":
+    draw_heatmap("./log/simul-heatmap.txt", show=False)
+    draw_graph("./log/simul-power.txt", show=False)

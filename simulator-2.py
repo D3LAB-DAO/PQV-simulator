@@ -92,7 +92,7 @@ if __name__ == "__main__":
 
     """argparse"""
     parser = argparse.ArgumentParser()
-    parser.add_argument('--nRounds', type=int, default=330000)
+    parser.add_argument('--nRounds', type=int, default=999999)
     parser.add_argument('--nPolicies', type=int, default=16)
     parser.add_argument('--nAgents', type=int, default=300)
     parser.add_argument('--totalBallots', type=int, default=100000)

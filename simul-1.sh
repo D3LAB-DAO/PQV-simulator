@@ -1,4 +1,4 @@
-for i in `seq 1.0 0.1 3.0`; do  # 3.0
+for i in `seq 1.0 0.1 3.05`; do  # 3.0
     python simulator-1.py --pqvMethod='power' --power=$i "$@"
 done
 

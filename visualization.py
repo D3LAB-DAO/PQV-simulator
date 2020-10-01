@@ -77,5 +77,5 @@ def draw_graph(filename, show=False):
 
 
 if __name__ == "__main__":
-    # draw_heatmap("./log/simul-heatmap.txt", show=False)
+    draw_heatmap("./log/simul-heatmap.txt", show=False)
     draw_graph("./log/simul-power.txt", show=False)

@@ -7,22 +7,22 @@ Probabilistic Quadratic Voting Simulator.
 
 ![](./plots/pareto.png)
 
-### Similarity among plain, QV and PQV (1)
+### Similarity among equal, plain and QV versus PQV (1)
 
-exponent  : Graph : `[1.0, 1.5, 2.0, 2.5, 3.0]`
-
-TODO
-
-txWindow  : Graph : `range(10, 100 + 1, 10)` [%]
+exponent  : Graph : `seq 1.0 0.5 3.0`
 
 TODO
 
-### Similarity among plain, QV and PQV (2)
+txWindow  : Graph : `seq 10 10 100` [%]
+
+TODO
+
+### Similarity among equal, plain and QV versus PQV (2)
 
 Using the best hyperparameters from simulation 1 (Grid Search) .
 
-* nPolicies : `range(2, 16 + 1, 2)`
-* nAgents   : `range(30, 300 + 1, 30)`
+* nPolicies : `seq 2 1 16`
+* nAgents   : `seq 30 30 300`
 
 <!--Heatmap-->
 TODO

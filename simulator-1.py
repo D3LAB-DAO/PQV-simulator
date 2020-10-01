@@ -153,9 +153,9 @@ if __name__ == "__main__":
             _PQV_vs_plain += tmp[1]
             _PQV_vs_QV += tmp[2]
 
-    sim_plain_vs_QV = 100. - (_PQV_vs_equal / args.nRounds * 100.)
-    sim_QV_vs_PQV = 100. - (_PQV_vs_plain / args.nRounds * 100.)
-    sim_PQV_vs_plain = 100. - (_PQV_vs_QV / args.nRounds * 100.)
+    sim_PQV_vs_equal = 100. - (_PQV_vs_equal / args.nRounds * 100.)
+    sim_PQV_vs_plain = 100. - (_PQV_vs_plain / args.nRounds * 100.)
+    sim_PQV_vs_QV = 100. - (_PQV_vs_QV / args.nRounds * 100.)
     # print("\nsimilarity: ", sim, "%")
 
     path = (args.path or './log')
@@ -163,7 +163,7 @@ if __name__ == "__main__":
     with open(path + "/simul-" + args.pqvMethod + ".txt", "a") as f:
         f.write(
             str(args.power or args.window) + "\t" +
-            str(sim_plain_vs_QV) + "\t" +
-            str(sim_QV_vs_PQV) + "\t" +
+            str(sim_PQV_vs_equal) + "\t" +
             str(sim_PQV_vs_plain) + "\t" +
+            str(sim_PQV_vs_QV) + "\t" +
             "\n")

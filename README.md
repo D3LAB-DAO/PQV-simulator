@@ -9,13 +9,15 @@ Probabilistic Quadratic Voting Simulator.
 
 ### Similarity among equal, plain and QV versus PQV (1)
 
-exponent  : Graph : `seq 1.0 0.5 3.0`
+exponent  : Graph : `seq 1.0 0.5 3.1`
 
 TODO
 
+<!--
 txWindow  : Graph : `seq 10 10 100` [%]
 
 TODO
+-->
 
 ### Similarity among equal, plain and QV versus PQV (2)
 

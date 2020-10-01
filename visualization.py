@@ -63,7 +63,11 @@ def draw_graph(filename, show=False):
     ax1.set_xlim((keys[0], keys[-1]))
     ax1.set_ylim((0, 100.))
 
-    plt.legend(loc='lower right')
+    plt.legend(
+        loc='lower center',
+        bbox_to_anchor=(0.5, 1.00),
+        ncol=3
+    )
 
     if show:
         plt.show()
@@ -73,5 +77,5 @@ def draw_graph(filename, show=False):
 
 
 if __name__ == "__main__":
-    draw_heatmap("./log/simul-heatmap.txt", show=False)
+    # draw_heatmap("./log/simul-heatmap.txt", show=False)
     draw_graph("./log/simul-power.txt", show=False)

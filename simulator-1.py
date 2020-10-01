@@ -17,7 +17,7 @@ from box import Box
 def simulation(index, s, agents, ps, rounds, args, result):
     random.seed(s)
 
-    unmatchingCount = 0
+    unmatchingCount_equal_vs_QV, unmatchingCount_QV_vs_PQV, unmatchingCount_PQV_vs_equal = 0, 0, 0
 
     for r in tqdm(range(rounds), position=index):
         # print(">>> Process: ", index, "\tRound ", r+1, "\t/", rounds, end='\r')
@@ -68,14 +68,15 @@ def simulation(index, s, agents, ps, rounds, args, result):
         for agent, p in zip(agents, ps):
             agent.reset(args.nPolicies, p)
 
-        if box_PQV.getWinner() != box_QV.getWinner():
-            # print(">>> winner : ", box_equal.getWinner(), "\t", box_QV.getWinner(), "\t", box_PQV.getWinner())
-            unmatchingCount += 1
-        # print(">>> current: ", box_equal.policies, "\t", box_QV.policies, "\t", box_PQV.policies,)
-        # print("\n")
+        if box_equal.getWinner() != box_QV.getWinner():
+            unmatchingCount_equal_vs_QV += 1
+        if box_QV.getWinner() != box_PQV.getWinner():
+            unmatchingCount_QV_vs_PQV += 1
+        if box_PQV.getWinner() != box_equal.getWinner():
+            unmatchingCount_PQV_vs_equal += 1
 
     # print(unmatchingCount)
-    result.put(unmatchingCount)
+    result.put((unmatchingCount_equal_vs_QV, unmatchingCount_QV_vs_PQV, unmatchingCount_PQV_vs_equal))
 
 
 if __name__ == "__main__":
@@ -133,19 +134,27 @@ if __name__ == "__main__":
 
     result.put('STOP')
 
-    _sum = 0
+    _equal_vs_QV, _QV_vs_PQV, _PQV_vs_equal = 0, 0, 0
     while True:
         tmp = result.get()
         if tmp == 'STOP':
             break
         else:
-            _sum += tmp
+            _equal_vs_QV += tmp[0]
+            _QV_vs_PQV += tmp[1]
+            _PQV_vs_equal += tmp[2]
 
-    # print("\nunmatchingCount: ", _sum)
-    sim = 100. - (_sum / args.nRounds * 100.)
-    print("\nsimilarity: ", sim, "%")
+    sim_equal_vs_QV = 100. - (_equal_vs_QV / args.nRounds * 100.)
+    sim_QV_vs_PQV = 100. - (_QV_vs_PQV / args.nRounds * 100.)
+    sim_PQV_vs_equal = 100. - (_PQV_vs_equal / args.nRounds * 100.)
+    # print("\nsimilarity: ", sim, "%")
 
     path = (args.path or './log')
     os.makedirs(path, exist_ok=True)
     with open(path + "/simul-" + args.pqvMethod + ".txt", "a") as f:
-        f.write(str(args.power or args.window) + "\t" + str(sim) + "\n")
+        f.write(
+            str(args.power or args.window) + "\t" +
+            str(sim_equal_vs_QV) + "\t" +
+            str(sim_QV_vs_PQV) + "\t" +
+            str(sim_PQV_vs_equal) + "\t" +
+            "\n")

@@ -83,6 +83,7 @@ def simulation(index, s, agents, ps, rounds, args, result):
             unmatchingCount_PQV_vs_QV += 1
 
     # print(unmatchingCount)
+    # TODO: Distance
     result.put((unmatchingCount_PQV_vs_equal,
                 unmatchingCount_PQV_vs_plain,
                 unmatchingCount_PQV_vs_QV))

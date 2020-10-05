@@ -1,6 +1,8 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
+import os
+import numpy as np
 
 
 def draw_heatmap(filename, show=False):
@@ -76,6 +78,77 @@ def draw_graph(filename, show=False):
         plt.close()
 
 
+def get_medium_graph(file_name, input_path='./log', output_path='./log'):
+    path_s = os.listdir(input_path)
+    num_dirs = 0
+
+    res = dict()
+
+    for path_ in path_s:
+        if os.path.isdir(input_path + '/' + path_):
+            num_dirs += 1
+
+            with open(input_path + '/' + path_ + file_name, 'r') as f:
+                lines = f.readlines()
+                lines = [line.split('\t')[:-1] for line in lines]
+
+            for line in lines:
+                key = float(line[0])
+                values = np.array([float(line[1]), float(line[2]), float(line[3])])
+                if key in res:
+                    # res[key] += values  # Avg.
+                    res[key] = np.append(res[key], [values], axis=0)  # Median.
+                else:
+                    # res[key] = values  # Avg.
+                    res[key] = np.array([values])  # Median.
+
+    for k, v in res.items():
+        # res[k] = list(v / num_dirs)  # Avg.
+        res[k] = np.median(res[k], axis=0)  # Median.
+
+    with open(input_path + '/' + file_name, 'w') as f:
+        for k, v in res.items():
+            f.write(str(k) + '\t' + '\t'.join([str(s) for s in v]) + '\t')
+            f.write('\n')
+
+
+def get_medium_heatmap(file_name, input_path='./log', output_path='./log'):
+    path_s = os.listdir(input_path)
+    num_dirs = 0
+
+    res = dict()
+
+    for path_ in path_s:
+        if os.path.isdir(input_path + '/' + path_):
+            num_dirs += 1
+
+            with open(input_path + '/' + path_ + file_name, 'r') as f:
+                lines = f.readlines()
+                lines = [line.split('\t')[:-1] for line in lines]
+
+            for line in lines:
+                key = (int(line[0]), int(line[1]))
+                values = np.array([float(line[2]), float(line[3]), float(line[4])])
+                if key in res:
+                    # res[key] += values  # Avg.
+                    res[key] = np.append(res[key], [values], axis=0)  # Median.
+                else:
+                    # res[key] = values  # Avg.
+                    res[key] = np.array([values])  # Median.
+
+    for k, v in res.items():
+        # res[k] = list(v / num_dirs)  # Avg.
+        res[k] = np.median(res[k], axis=0)  # Median.
+
+    with open(input_path + '/' + file_name, 'w') as f:
+        for k, v in res.items():
+            f.write('\t'.join([str(s) for s in k]) + '\t' + '\t'.join([str(s) for s in v]) + '\t')
+            f.write('\n')
+
+
 if __name__ == "__main__":
+    get_medium_graph("/simul-power.txt")
+    get_medium_heatmap("/simul-heatmap.txt")
+
     draw_heatmap("./log/simul-heatmap.txt", show=False)
     draw_graph("./log/simul-power.txt", show=False)

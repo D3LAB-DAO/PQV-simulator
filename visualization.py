@@ -148,7 +148,7 @@ def get_medium_heatmap(file_name, input_path='./log', output_path='./log'):
 
 if __name__ == "__main__":
     get_medium_graph("/simul-power.txt")
-    get_medium_heatmap("/simul-heatmap.txt")
-
-    draw_heatmap("./log/simul-heatmap.txt", show=False)
     draw_graph("./log/simul-power.txt", show=False)
+
+    get_medium_heatmap("/simul-heatmap.txt")
+    draw_heatmap("./log/simul-heatmap.txt", show=False)

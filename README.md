@@ -3,6 +3,16 @@ Probabilistic Quadratic Voting Simulator.
 
 # Run
 ```
+$ sh simul-ch.sh [--option=value, ...]
+```
+
+# Get results
+```
+$ python3 getAverage.py
+```
+
+# Run other scripts
+```
 $ sh simul-1.sh [--option=value, ...]
 $ sh simul-2.sh [--option=value, ...]
 ```

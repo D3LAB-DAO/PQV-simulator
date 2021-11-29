@@ -1,37 +1,45 @@
 # PQV-simulator
-Probabilistic Quadratic Voting Simulator.
 
-# Run
+Probabilistic Quadratic Voting Simulator
+
+## `simulator_simularity`
+
+* Calculate simularity among various voting methods.
+
+## `simulator_heatmap`
+
+* Calculate simularity and ready to visualize it in a heatmap.
+
+## `simulator_ch`
+
+* Simulator for [Chainlink Hackathon](https://chainlink-fall-hackathon-2021.devpost.com)
+* PQV and QV similarity measurement for calculating the best hyperparameters such as *`e`* in PQV method.
+
+# How-to-Run
+
+Run script what you want to simulate. Python3 is required.
+
 ```
-$ sh simul-ch.sh [--option=value, ...]
+$ sh simul_simularity.sh [--option=value, ...]
+$ sh simul_heatmap.sh [--option=value, ...]
+$ sh simul_ch.sh [--option=value, ...]
 ```
 
-# Get results
+# Visualize and Analysis
 ```
-$ python3 getAverage.py
-```
-
-# Run other scripts
-```
-$ sh simul-1.sh [--option=value, ...]
-$ sh simul-2.sh [--option=value, ...]
-```
-
-# Visualization
-
-```
-$ python visualization.py
+$ python getPlots.py
+$ python getAverage.py
 ```
 
 ## Pareto dist. of ballots
 
-![](./plots/pareto.png)
+![](./visualization/plots/pareto.png)
 
 ## Similarity among equal, plain and QV versus PQV (1)
 
 * exponent  : `seq 1.0 0.5 3.05`  # 3.0
 
-![](./plots/graph.png)
+![](./visualization/plots/graph.png)
 
 <!--
 txWindow    : Graph : `seq 10 10 100` [%]
@@ -46,12 +54,12 @@ Using the best hyperparameters from simulation 1 (Grid Search) .
 
 ### PQV vs. Equal
 
-![](./plots/heatmap_PQV_vs_equal.png)
+![](./visualization/plots/heatmap_PQV_vs_equal.png)
 
 ### PQV vs. Linear
 
-![](./plots/heatmap_PQV_vs_plain.png)
+![](./visualization/plots/heatmap_PQV_vs_plain.png)
 
 ### PQV vs. QV
 
-![](./plots/heatmap_PQV_vs_QV.png)
+![](./visualization/plots/heatmap_PQV_vs_QV.png)

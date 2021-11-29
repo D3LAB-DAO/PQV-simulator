@@ -1,9 +1,10 @@
-# simulator for chainlink hackathon
+# Simulator for Chainlink Hackathon
+#
 # PQV vs QV similarity measurement
-# policy num: 2 (yes, no)
-# agents num: variable
-# ballot num per participant: following pareto distribution
-# 'e' value in probability: x^e = N (x: largest casted ballot num, N: total cated ballot)
+# * policy num: 2 (yes, no)
+# * agents num: variable
+# * ballot num per participant: following pareto distribution
+# * 'e' value in probability: x^e = N (x: largest casted ballot num, N: total cated ballot)
 
 from multiprocessing import Process, Queue
 import os
